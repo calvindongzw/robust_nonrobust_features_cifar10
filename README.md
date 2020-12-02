@@ -64,5 +64,5 @@ Linf-PGD Attack
 
 **Robust CIFAR10 Samples**
 
-<img src="./pics/images.png">
+<img src="./pics/images.png" width=400>
 
