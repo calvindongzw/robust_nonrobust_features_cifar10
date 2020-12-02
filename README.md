@@ -50,8 +50,8 @@ Linf-PGD Attack
 |Model|Clean Accuracy|Adv Accuracy (L2-PGD Attack (eps=0.25))|
 |-----|--------------|------------|
 |Baseline Model|91.72%|3.87%|
-|Adv Trained model($l_2$)|83.83%|74.51%|
-|Adv Trained model($l_\infity$)|78.57%|69.53%|
+|Adv Trained model(L-2)|83.83%|74.51%|
+|Adv Trained model(L-inf)|78.57%|69.53%|
 
 
 **Models trained on robust CIFAR10**
@@ -59,10 +59,10 @@ Linf-PGD Attack
 |Model|Clean Accuracy|Adv Accuracy (L2-PGD Attack (eps=0.25))|
 |-----|--------------|------------|
 |Trained on standard set|91.72%|3.87%|
-|Trained on robust set (clip function|60.48%|34.47%|
+|Trained on robust set (clip function)|60.48%|34.47%|
 |Trained on robust set (normalization)|73.55%|45.38%|
 
 **Robust CIFAR10 Samples**
 
-<img src=".image.png">
+<img src="./pics/image.png">
 
