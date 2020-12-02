@@ -34,9 +34,6 @@ def train_model(net, optimizer, scheduler, train, val, device, num_epochs, summa
 
             inputs = inputs.to(device)
             labels = labels.to(device)
-            
-            #inputs = inputs + np.random.uniform(-epsilon, epsilon, inputs.size)
-            #inputs = np.clip(inputs, 0, 255) # ensure valid pixel range
 
             # Generate adversarial training examples
             if do_advtrain:
@@ -65,23 +62,23 @@ def train_model(net, optimizer, scheduler, train, val, device, num_epochs, summa
             running_loss += loss.item() * inputs.size(0)
             running_corrects += torch.sum(preds == labels.data)
             
-            if ii % 50 == 0:
-                logging.info("{}, running loss: {:.4f}, running corrects: {:.4f}".format(ii, running_loss, running_corrects))
+            #if ii % 50 == 0:
+             #   print("{}, running loss: {:.4f}, running corrects: {:.4f}".format(ii, running_loss, running_corrects))
             
-            ii += 1
+            #ii += 1
 
         scheduler.step()
 
         
-        logging.info("{} epoch train completed".format(i))
-        logging.info("====================================")
+        print("{} epoch train completed".format(i))
+        #logging.info("====================================")
 
         if i % summary_steps == 0:
 
             epoch_loss = running_loss / len(train.trainset)
             epoch_acc = running_corrects.cpu().numpy() / len(train.trainset)
 
-            logging.info('{} Train Loss: {:.4f} Trian Acc: {:.4f}'.format(i, epoch_loss, epoch_acc))
+            print('{} Train Loss: {:.4f} Trian Acc: {:.4f}'.format(i, epoch_loss, epoch_acc))
 
             running_loss = 0.0
             running_corrects = 0
@@ -96,7 +93,7 @@ def train_model(net, optimizer, scheduler, train, val, device, num_epochs, summa
                 # Generate adversarial training examples
                 if do_advtrain_val:
                     attack = attacks.PGDAttack(net, ATK_EPS, ATK_ITERS, ATK_ALPHA, rand=True)
-                    val_inputs = attack.perturb_l2_v2(val_inputs, labels)
+                    inputs = attack.perturb_l2_v2(val_inputs, val_labels)
 
                 val_inputs = val_inputs.cuda()
                 val_labels = val_labels.cuda()
@@ -111,7 +108,7 @@ def train_model(net, optimizer, scheduler, train, val, device, num_epochs, summa
 
                     _, preds = torch.max(outputs, 1)
 
-                    loss = F.cross_entropy(outputs, labels)
+                    loss = F.cross_entropy(outputs, val_labels)
 
                 running_loss += loss.item() * val_inputs.size(0)
                 running_corrects += torch.sum(preds == val_labels.data)
@@ -119,7 +116,7 @@ def train_model(net, optimizer, scheduler, train, val, device, num_epochs, summa
             epoch_loss = running_loss / len(val.trainset)
             epoch_acc = running_corrects.cpu().numpy() / len(val.trainset)
 
-            logging.info('{} Val Loss: {:.4f} Val Acc: {:.4f}'.format(i, epoch_loss, epoch_acc))
+            print('{} Val Loss: {:.4f} Val Acc: {:.4f}'.format(i, epoch_loss, epoch_acc))
 
             if epoch_acc > best_acc:
                 best_acc = epoch_acc
@@ -130,5 +127,5 @@ def train_model(net, optimizer, scheduler, train, val, device, num_epochs, summa
         #logging.info()
 
     time_elapsed = time.time() - since
-    logging.info('Training complete in {:.0f}m {:.0f}s'.format(time_elapsed // 60, time_elapsed % 60))
-    logging.info('Best val Acc: {:4f}'.format(best_acc))
+    print('Training complete in {:.0f}m {:.0f}s'.format(time_elapsed // 60, time_elapsed % 60))
+    print('Best val Acc: {:4f}'.format(best_acc))

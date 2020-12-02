@@ -15,7 +15,7 @@ import copy
 # Custom
 import model
 import attacks
-from train_util import *
+from train_util_linf import *
 from cifar_input import *
 
 # create logger
@@ -56,23 +56,23 @@ val = CIFAR10_Raw(data_path, train=False, download=True, batch_size=128, shuffle
 
 ## Adversarial training
 
-net = model.ResNetCIFAR().to(device)
+net = model.ResNetCIFAR(50).to(device)
 
 ## Checkpoint name for this model
 
-model_checkpoint = "adv_model.pt"
+model_checkpoint = "adv_model_50_linf.pt"
 
 ## Basic training params
 
-num_epochs = 200
+num_epochs = 20
 initial_lr = 0.1
 momentum = 0.9
 weight_decay = 5e-4
-summary_steps = 10
+summary_steps = 5
 
-ATK_EPS = 0.5
+ATK_EPS = 8 / 255
 ATK_ITERS = 7
-ATK_ALPHA = ATK_EPS / 5
+ATK_ALPHA = 2 / 255
 
 do_advtrain = True
 do_advtrain_val = False
@@ -80,7 +80,7 @@ do_advtrain_val = False
 optimizer = torch.optim.SGD(net.parameters(), initial_lr, momentum, weight_decay)
 scheduler = optim.lr_scheduler.MultiStepLR(optimizer, milestones=[int(num_epochs*0.5), int(num_epochs*0.75)], gamma=0.1)
 
-logging.basicConfig(filename='adv_train.log', level=logging.INFO)
+logging.basicConfig(filename='adv_train_50_linf.log', level=logging.INFO)
 logging.info('Started')
 
 train_model(net, optimizer, scheduler, train, val, device, num_epochs, summary_steps, ATK_EPS, ATK_ITERS, ATK_ALPHA, model_checkpoint, 

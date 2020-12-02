@@ -15,8 +15,6 @@ import pickle
 
 # Custom
 import model
-import attacks
-from train_util import *
 from cifar_input import *
 
 # create logger
@@ -51,9 +49,9 @@ sys.excepthook = handle_exception
 device = "cuda" if torch.cuda.is_available() else "cpu"
 
 net = model.ResNetCIFAR(50).to(device)
-net.load_state_dict(torch.load("adv_model_50.pt"))
+net.load_state_dict(torch.load("adv_model_50_l2.pt"))
 
-model = Dr_model(net).cuda()
+model = nn.Sequential(*list(net.children())[:-2]).cuda()
 
 data_path = './data'
 
@@ -106,11 +104,14 @@ def r_sample(model, max_epoch, step_size, start, end):
                 grad = s_inputs.grad.data
                 g_norm = torch.norm(grad.view(grad.shape[0], -1), dim=1).view(-1, *([1]*l_s))
                 scaled_g = grad / (g_norm + 1e-10)
-    #                 if i % 50 == 0:
-    #                     print(normalized_grad)
+
                 s_inputs = s_inputs.clone().detach() - step_size * scaled_g
-            
-                s_inputs = torch.clamp(s_inputs.clone().detach(), 0 ,1)
+                
+                # Clip
+                #s_inputs = torch.clamp(s_inputs.clone().detach(), 0 ,1)
+                
+                # Normalize
+                s_inputs = (s_inputs - s_inputs.min()) / (s_inputs.max() - s_inputs.min())
                 
             Dr.append((s_inputs.clone().detach(), labels.clone().detach()))
 
@@ -122,7 +123,6 @@ def r_sample(model, max_epoch, step_size, start, end):
             with open("Dr_" + str(start) + "_" + str(end) + ".txt", "wb") as f:   #Pickling
                 pickle.dump(Dr, f)
     
-#Dr = r_sample(model, 50000, 0.0005)
-r_sample(model, 1000, 0.1, 0, 1000)
+r_sample(model, 1000, 1, 0, 50000)
 
 logging.info('Finished')
